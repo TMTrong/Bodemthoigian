@@ -61,11 +61,5 @@ Chúng tôi luôn hoan nghênh mọi đóng góp để cải thiện module:
 
 ---
 
-## 📄 Giấy phép
-
-Module được phát hành theo giấy phép **GPLv2 hoặc cao hơn**.
-
----
-
-> © 2025 Countdown Timer for Joomla - All rights reserved.
+Cảm ơn bạn đã sử dụng
 
