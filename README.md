@@ -42,7 +42,7 @@
 ## 🛠️ Hướng dẫn sử dụng
 
 1. Truy cập `Extensions > Modules`.
-2. Tìm kiếm module **"Countdown Timer"** và nhấp vào để cấu hình.
+2. Tìm kiếm module **"Bộ đếm thời gian"** và nhấp vào để cấu hình.
 3. Cấu hình các thông tin cần thiết:
    - ⏰ **Thời gian kết thúc**: Nhập ngày giờ bạn muốn bộ đếm đếm tới.
    - 📍 **Vị trí hiển thị**: Chọn vị trí hiển thị module trên template.
