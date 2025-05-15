@@ -11,9 +11,9 @@ Tính năng chính:
 - Hiển thị đếm ngược: Đếm ngược chính xác theo thời gian thực (ngày, giờ, phút, giây).
 - Tùy chỉnh thời gian đếm: Cấu hình thời gian kết thúc trong phần quản trị.
 - Chức năng điều khiển nâng cao:
-Bắt đầu (Start): Khởi động bộ đếm theo sự kiện hoặc hành động người dùng.
-Tạm dừng (Pause): Dừng đếm ngược tạm thời.
-Khởi động lại (Reset): Đặt lại thời gian ban đầu.
+    Bắt đầu (Start): Khởi động bộ đếm theo sự kiện hoặc hành động người dùng.
+    Tạm dừng (Pause): Dừng đếm ngược tạm thời.
+    Khởi động lại (Reset): Đặt lại thời gian ban đầu.
 - Responsive & thân thiện với thiết bị di động.
 - Tùy chỉnh giao diện dễ dàng: Hỗ trợ CSS, hiệu ứng và nhiều định dạng hiển thị.
 
