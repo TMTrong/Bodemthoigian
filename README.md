@@ -1,1 +1,3 @@
-Zalo Chat Module for Joomla
+Bộ đếm thời gian cho joomla
+
+Giới Thiệu
