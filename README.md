@@ -1,7 +1,7 @@
-# Countdown Timer Module for Joomla
+# Bộ đếm thời gian for Joomla
 
 ## 🧭 Giới thiệu  
-**Countdown Timer Module for Joomla** là một module mạnh mẽ giúp người dùng tích hợp chức năng **đếm ngược thời gian** vào trang web Joomla của mình. Module này cho phép bạn:
+**Bộ đếm thời gian for Joomla** là một module mạnh mẽ giúp người dùng tích hợp chức năng **đếm ngược thời gian** vào trang web Joomla của mình. Module này cho phép bạn:
 
 - Hiển thị đồng hồ đếm ngược đến một thời điểm cụ thể (sự kiện, chương trình khuyến mãi, ngày ra mắt...).
 - Tạo cảm giác khẩn trương và thúc đẩy hành động từ người dùng.
