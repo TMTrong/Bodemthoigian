@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="module" version="3.0" client="site" method="upgrade">
+    <name>MOD_COUNTDOWN</name>
+    <author>Your Name</author>
+    <version>2.0.1</version>
+    <description>Bộ đếm ngược đa năng</description>
+    
+    <files>
+        <filename module="mod_countdown">mod_countdown.php</filename>
+        <folder>tmpl</folder>
+    </files>
+    
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                    name="default_days"
+                    type="text"
+                    label="Ngày mặc định"
+                    default="0"
+                    filter="INTEGER"
+                />
+                <field
+                    name="default_hours"
+                    type="text"
+                    label="Giờ mặc định"
+                    default="1"
+                    filter="INTEGER"
+                />
+                <field
+                    name="default_minutes"
+                    type="text"
+                    label="Phút mặc định"
+                    default="0"
+                    filter="INTEGER"
+                />
+                <field
+                    name="default_seconds"
+                    type="text"
+                    label="Giây mặc định"
+                    default="0"
+                    filter="INTEGER"
+                />
+            </fieldset>
+        </fields>
+    </config>
+</extension>
