@@ -2,45 +2,124 @@
 <extension type="module" version="3.0" client="site" method="upgrade">
     <name>MOD_COUNTDOWN</name>
     <author>Your Name</author>
-    <version>2.0.1</version>
-    <description>Bộ đếm ngược đa năng</description>
+    <version>2.1.0</version>
+    <description><![CDATA[Bộ đếm ngược thông minh<br/>Tích hợp đầy đủ điều khiển và tự động chạy]]></description>
     
     <files>
         <filename module="mod_countdown">mod_countdown.php</filename>
+        <filename>helper.php</filename>
         <folder>tmpl</folder>
+        <folder>language</folder>
     </files>
     
     <config>
         <fields name="params">
             <fieldset name="basic">
+                <!-- Nhóm cài đặt thời gian -->
+                <field name="time_settings" type="spacer" label="CÀI ĐẶT THỜI GIAN" />
+                
                 <field
                     name="default_days"
-                    type="text"
-                    label="Ngày mặc định"
+                    type="number"
+                    label="NGÀY"
                     default="0"
+                    min="0"
                     filter="INTEGER"
                 />
                 <field
                     name="default_hours"
-                    type="text"
-                    label="Giờ mặc định"
+                    type="number"
+                    label="GIỜ"
                     default="1"
+                    min="0"
+                    max="23"
                     filter="INTEGER"
                 />
                 <field
                     name="default_minutes"
-                    type="text"
-                    label="Phút mặc định"
+                    type="number"
+                    label="PHÚT"
                     default="0"
+                    min="0"
+                    max="59"
                     filter="INTEGER"
                 />
                 <field
                     name="default_seconds"
-                    type="text"
-                    label="Giây mặc định"
+                    type="number"
+                    label="GIÂY"
                     default="0"
+                    min="0"
+                    max="59"
                     filter="INTEGER"
                 />
+                
+                <!-- Nhóm điều khiển -->
+                <field name="control_settings" type="spacer" label="CÀI ĐẶT ĐIỀU KHIỂN" />
+                
+                <field
+                    name="show_controls"
+                    type="radio"
+                    label="HIỂN THỊ ĐIỀU KHIỂN"
+                    description="Hiển thị các nút điều khiển cho người dùng"
+                    default="1"
+                    class="btn-group btn-group-yesno"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                
+                <field
+                    name="auto_start"
+                    type="radio"
+                    label="TỰ ĐỘNG CHẠY"
+                    description="Bộ đếm tự động chạy khi trang tải"
+                    default="1"
+                    showon="show_controls:0"
+                    class="btn-group btn-group-yesno"
+                >
+                    <option value="1">JYES</option>
+                    <option value="0">JNO</option>
+                </field>
+                
+                <field
+                    name="start_text"
+                    type="text"
+                    label="TEXT NÚT BẮT ĐẦU"
+                    default="▶️ Bắt đầu"
+                    showon="show_controls:1"
+                    filter="raw"
+                />
+                <field
+                    name="pause_text"
+                    type="text"
+                    label="TEXT NÚT TẠM DỪNG"
+                    default="⏸️ Tạm dừng"
+                    showon="show_controls:1"
+                    filter="raw"
+                />
+                <field
+                    name="reset_text"
+                    type="text"
+                    label="TEXT NÚT RESET"
+                    default="🔄 Reset"
+                    showon="show_controls:1"
+                    filter="raw"
+                />
+                
+                <!-- Nhóm hiển thị -->
+                <field name="display_settings" type="spacer" label="CÀI ĐẶT HIỂN THỊ" />
+                
+                <field
+                    name="display_style"
+                    type="list"
+                    label="KIỂU HIỂN THỊ"
+                    default="default"
+                >
+                    <option value="default">Mặc định</option>
+                    <option value="compact">Compact</option>
+                    <option value="flip">Hiệu ứng lật</option>
+                </field>
             </fieldset>
         </fields>
     </config>
