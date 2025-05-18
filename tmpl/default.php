@@ -1,163 +1,169 @@
 <?php
 defined('_JEXEC') or die;
 
-$defaultDays = $params->get('default_days', 0);
-$defaultHours = $params->get('default_hours', 1);
-$defaultMinutes = $params->get('default_minutes', 0);
-$defaultSeconds = $params->get('default_seconds', 0);
+// Lấy tham số từ module
+$showControls = (bool) $params->get('show_controls', 1);
+$autoStart = (bool) $params->get('auto_start', 1);
+$buttonTexts = [
+    'start' => $params->get('start_text', '▶️ Bắt đầu'),
+    'pause' => $params->get('pause_text', '⏸️ Tạm dừng'),
+    'reset' => $params->get('reset_text', '🔄 Reset'),
+    'resume' => $params->get('resume_text', '▶️ Tiếp tục')
+];
+
+// Tính toán thời gian ban đầu
+$initialSeconds = ($params->get('default_days', 0) * 86400)
+                + ($params->get('default_hours', 1) * 3600)
+                + ($params->get('default_minutes', 0) * 60)
+                + $params->get('default_seconds', 0);
 ?>
 
 <div class="mod-countdown" id="mod-countdown-<?php echo $module->id; ?>">
-    <div class="countdown-display">00d 00h 00m 00s</div>
+    <div class="countdown-display">
+        <?php echo sprintf("%02dd %02dh %02dm %02ds", 
+            $params->get('default_days', 0),
+            $params->get('default_hours', 1),
+            $params->get('default_minutes', 0),
+            $params->get('default_seconds', 0)
+        ); ?>
+    </div>
     
+    <?php if ($showControls) : ?>
     <div class="countdown-controls">
-        <!-- Ô nhập thời gian tùy chỉnh -->
         <div class="time-inputs">
-            <input type="number" class="countdown-input-days" min="0" value="<?php echo $defaultDays; ?>" placeholder="Ngày">
-            <input type="number" class="countdown-input-hours" min="0" max="23" value="<?php echo $defaultHours; ?>" placeholder="Giờ">
-            <input type="number" class="countdown-input-minutes" min="0" max="59" value="<?php echo $defaultMinutes; ?>" placeholder="Phút">
-            <input type="number" class="countdown-input-seconds" min="0" max="59" value="<?php echo $defaultSeconds; ?>" placeholder="Giây">
+            <input type="number" class="countdown-input-days" min="0" 
+                   value="<?php echo $params->get('default_days', 0); ?>" placeholder="Ngày">
+            <input type="number" class="countdown-input-hours" min="0" max="23" 
+                   value="<?php echo $params->get('default_hours', 1); ?>" placeholder="Giờ">
+            <input type="number" class="countdown-input-minutes" min="0" max="59" 
+                   value="<?php echo $params->get('default_minutes', 0); ?>" placeholder="Phút">
+            <input type="number" class="countdown-input-seconds" min="0" max="59" 
+                   value="<?php echo $params->get('default_seconds', 0); ?>" placeholder="Giây">
         </div>
         
         <div class="buttons">
-            <button class="btn-start">Bắt đầu</button>
-            <button class="btn-pause">Tạm dừng</button>
-            <button class="btn-reset">Reset</button>
+            <button class="btn-start"><?php echo htmlspecialchars($buttonTexts['start']); ?></button>
+            <button class="btn-pause"><?php echo htmlspecialchars($buttonTexts['pause']); ?></button>
+            <button class="btn-reset"><?php echo htmlspecialchars($buttonTexts['reset']); ?></button>
         </div>
     </div>
+    <?php endif; ?>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const moduleId = <?php echo $module->id; ?>;
-    const container = document.getElementById(`mod-countdown-${moduleId}`);
-    const displayEl = container.querySelector('.countdown-display');
-    
-    // Các ô nhập liệu
-    const inputDays = container.querySelector('.countdown-input-days');
-    const inputHours = container.querySelector('.countdown-input-hours');
-    const inputMinutes = container.querySelector('.countdown-input-minutes');
-    const inputSeconds = container.querySelector('.countdown-input-seconds');
-    
-    // Các nút điều khiển
-    const btnStart = container.querySelector('.btn-start');
-    const btnPause = container.querySelector('.btn-pause');
-    const btnReset = container.querySelector('.btn-reset');
+    const module = document.getElementById('mod-countdown-<?php echo $module->id; ?>');
+    if (!module) return;
 
-    let countdownInterval;
-    let remainingSeconds = 0;
+    // Elements
+    const display = module.querySelector('.countdown-display');
+    const daysInput = module.querySelector('.countdown-input-days');
+    const hoursInput = module.querySelector('.countdown-input-hours');
+    const minutesInput = module.querySelector('.countdown-input-minutes');
+    const secondsInput = module.querySelector('.countdown-input-seconds');
+    const startBtn = module.querySelector('.btn-start');
+    const pauseBtn = module.querySelector('.btn-pause');
+    const resetBtn = module.querySelector('.btn-reset');
+
+    // State
+    let interval;
+    let remainingSeconds = <?php echo $initialSeconds; ?>;
     let isPaused = false;
 
-    // Định dạng thời gian: DDd HHh MMm SSs
-    function formatTime(totalSeconds) {
-        const days = Math.floor(totalSeconds / (3600 * 24));
-        const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        
-        return `
-            ${String(days).padStart(2, '0')}d 
-            ${String(hours).padStart(2, '0')}h 
-            ${String(minutes).padStart(2, '0')}m 
-            ${String(seconds).padStart(2, '0')}s
-        `.replace(/\s+/g, ' ');
-    }
+    // Format time
+    const formatTime = (seconds) => {
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+        return `${String(days).padStart(2, '0')}d ${String(hours).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
+    };
 
-    // Bắt đầu đếm ngược
-    function startCountdown() {
-        clearInterval(countdownInterval);
-        
-        // Tính tổng số giây từ input
-        const days = parseInt(inputDays.value) || 0;
-        const hours = parseInt(inputHours.value) || 0;
-        const minutes = parseInt(inputMinutes.value) || 0;
-        const seconds = parseInt(inputSeconds.value) || 0;
-        
-        remainingSeconds = (days * 24 * 3600) + (hours * 3600) + (minutes * 60) + seconds;
-        
-        countdownInterval = setInterval(() => {
+    // Update display
+    const updateDisplay = () => {
+        display.textContent = formatTime(remainingSeconds);
+        if (daysInput) daysInput.value = Math.floor(remainingSeconds / 86400);
+        if (hoursInput) hoursInput.value = Math.floor((remainingSeconds % 86400) / 3600);
+        if (minutesInput) minutesInput.value = Math.floor((remainingSeconds % 3600) / 60);
+        if (secondsInput) secondsInput.value = remainingSeconds % 60;
+    };
+
+    // Start countdown
+    const startTimer = () => {
+        clearInterval(interval);
+        interval = setInterval(() => {
             if (!isPaused && remainingSeconds > 0) {
                 remainingSeconds--;
-                displayEl.textContent = formatTime(remainingSeconds);
-                
-                // Cập nhật các ô input khi đếm ngược
-                const days = Math.floor(remainingSeconds / (3600 * 24));
-                const hours = Math.floor((remainingSeconds % (3600 * 24)) / 3600);
-                const minutes = Math.floor((remainingSeconds % 3600) / 60);
-                const seconds = remainingSeconds % 60;
-                
-                inputDays.value = days;
-                inputHours.value = hours;
-                inputMinutes.value = minutes;
-                inputSeconds.value = seconds;
-            }
-            
-            if (remainingSeconds <= 0) {
-                clearInterval(countdownInterval);
-                displayEl.textContent = "00d 00h 00m 00s";
-                displayEl.classList.add('expired');
+                updateDisplay();
+                if (remainingSeconds <= 0) {
+                    clearInterval(interval);
+                    display.classList.add('expired');
+                }
             }
         }, 1000);
+    };
+
+    // Event listeners
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            remainingSeconds = (parseInt(daysInput.value) || 0) * 86400 +
+                             (parseInt(hoursInput.value) || 0) * 3600 +
+                             (parseInt(minutesInput.value) || 0) * 60 +
+                             (parseInt(secondsInput.value) || 0);
+            isPaused = false;
+            display.classList.remove('expired');
+            startTimer();
+        });
     }
 
-    // Sự kiện nút Bắt đầu
-    btnStart.addEventListener('click', () => {
-        isPaused = false;
-        btnPause.textContent = "Tạm dừng";
-        displayEl.classList.remove('expired');
-        startCountdown();
-    });
+    if (pauseBtn) {
+        pauseBtn.addEventListener('click', () => {
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? 
+                "<?php echo htmlspecialchars($buttonTexts['resume']); ?>" : 
+                "<?php echo htmlspecialchars($buttonTexts['pause']); ?>";
+        });
+    }
 
-    // Sự kiện nút Tạm dừng
-    btnPause.addEventListener('click', () => {
-        isPaused = !isPaused;
-        btnPause.textContent = isPaused ? "Tiếp tục" : "Tạm dừng";
-    });
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            clearInterval(interval);
+            remainingSeconds = <?php echo $initialSeconds; ?>;
+            isPaused = false;
+            updateDisplay();
+            display.classList.remove('expired');
+            if (pauseBtn) pauseBtn.textContent = "<?php echo htmlspecialchars($buttonTexts['pause']); ?>";
+        });
+    }
 
-    // Sự kiện nút Reset
-    btnReset.addEventListener('click', () => {
-        clearInterval(countdownInterval);
-        isPaused = false;
-        remainingSeconds = 0;
-        displayEl.textContent = formatTime(0);
-        btnPause.textContent = "Tạm dừng";
-        displayEl.classList.remove('expired');
-        
-        // Reset về giá trị mặc định
-        inputDays.value = <?php echo $defaultDays; ?>;
-        inputHours.value = <?php echo $defaultHours; ?>;
-        inputMinutes.value = <?php echo $defaultMinutes; ?>;
-        inputSeconds.value = <?php echo $defaultSeconds; ?>;
-    });
-
-    // Khởi tạo với thời gian mặc định
-    displayEl.textContent = formatTime(
-        (<?php echo $defaultDays; ?> * 24 * 3600) + 
-        (<?php echo $defaultHours; ?> * 3600) + 
-        (<?php echo $defaultMinutes; ?> * 60) + 
-        <?php echo $defaultSeconds; ?>
-    );
+    // Initialize
+    updateDisplay();
+    
+    // Tự động chạy khi không hiển thị điều khiển và autoStart được bật
+    <?php if (!$showControls && $autoStart) : ?>
+    startTimer();
+    <?php endif; ?>
 });
 </script>
 
 <style>
 .mod-countdown {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
     max-width: 600px;
-    margin: 0 auto;
+    margin: 20px auto;
     padding: 20px;
-    background: #f8f9fa;
+    background: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    text-align: center;
 }
 
 .countdown-display {
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     font-weight: bold;
-    text-align: center;
-    margin: 20px 0;
     color: #2c3e50;
-    letter-spacing: 2px;
+    margin: 15px 0;
+    letter-spacing: 1px;
 }
 
 .countdown-display.expired {
@@ -166,15 +172,18 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 @keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.countdown-controls {
+    margin-top: 20px;
 }
 
 .time-inputs {
     display: flex;
-    gap: 10px;
     justify-content: center;
+    gap: 10px;
     margin-bottom: 15px;
     flex-wrap: wrap;
 }
@@ -182,27 +191,27 @@ document.addEventListener('DOMContentLoaded', function() {
 .time-inputs input {
     width: 70px;
     padding: 10px;
-    text-align: center;
     border: 1px solid #ddd;
     border-radius: 5px;
+    text-align: center;
     font-size: 1rem;
 }
 
 .buttons {
     display: flex;
-    gap: 10px;
     justify-content: center;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .btn-start, .btn-pause, .btn-reset {
-    padding: 10px 20px;
+    padding: 12px 25px;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
     font-weight: bold;
+    cursor: pointer;
     transition: all 0.3s;
-    min-width: 100px;
+    font-size: 1rem;
 }
 
 .btn-start {
@@ -221,11 +230,22 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .btn-start:hover, .btn-pause:hover, .btn-reset:hover {
-    opacity: 0.9;
     transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-@media (max-width: 480px) {
+/* Ẩn input khi tắt điều khiển */
+<?php if (!$showControls) : ?>
+.time-inputs {
+    display: none !important;
+}
+<?php endif; ?>
+
+@media (max-width: 600px) {
+    .countdown-display {
+        font-size: 1.8rem;
+    }
+    
     .time-inputs input {
         width: 60px;
         padding: 8px;
@@ -233,12 +253,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     .buttons {
         flex-direction: column;
-        align-items: center;
     }
     
     .btn-start, .btn-pause, .btn-reset {
         width: 100%;
-        margin-bottom: 5px;
     }
 }
 </style>
